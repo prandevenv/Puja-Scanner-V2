@@ -110,19 +110,21 @@
       document.getElementById('resultSub').innerText = decodedText;
 
       try {
-        // Use text/plain to avoid CORS preflight options blocks in Google Apps Script
-        const response = await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ couponId: decodedText, pin: savedPin })
+        // Construct GET URL with encoded query parameters (Zero CORS issues)
+        const fetchUrl = `${SCRIPT_URL}?couponId=${encodeURIComponent(decodedText.trim())}&pin=${encodeURIComponent(savedPin)}`;
+
+        const response = await fetch(fetchUrl, {
+          method: "GET",
+          redirect: "follow"
         });
+
         const res = await response.json();
         renderResult(res);
+
       } catch (err) {
-        showError("Network/CORS error: " + err.message);
+        showError("Fetch error: " + err.message);
       }
     }
-
     function renderResult(res) {
       const modal = document.getElementById('resultModal');
       modal.classList.remove('hidden');
